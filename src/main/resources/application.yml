@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: youtuberef
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+  datasource:
+    url: jdbc:postgresql://${POSTGRESQL_HOST:localhost}:${POSTGRESQL_PORT:5432}/${POSTGRESQL_DATABASE:youtuberef}
+    username: ${POSTGRESQL_USER:user}
+    password: ${POSTGRESQL_PASSWORD:123456}
+    hikari:
+      pool-name: Hikari
+      auto-commit: false
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: postgresql
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+
+server:
+  port: 8080

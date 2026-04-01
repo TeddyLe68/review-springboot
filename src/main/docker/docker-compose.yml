@@ -1,0 +1,6 @@
+name: youtuberef
+services:
+  postgresql:
+    extends:
+      file: ./postgresql.yml
+      service: postgresql

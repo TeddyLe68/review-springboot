@@ -1,0 +1,22 @@
+# This configuration is intended to be used with Docker Compose to set up a PostgreSQL database for development purposes.
+name: youtuberef
+services:
+  postgresql:
+    image: postgres:16.2
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=youtuberef
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # if you don't want expose ports outside your dev PC
+      # remove the "127.0.0.1:" prefix to expose the port to the whole network
+    restart: on-failure
+    ports:
+      - 5432:5432
+
+
