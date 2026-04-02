@@ -2,6 +2,7 @@ package com.teddy.youtuberef.web.rest.impl;
 
 import com.teddy.youtuberef.service.VideoService;
 import com.teddy.youtuberef.service.dto.VideoDto;
+import com.teddy.youtuberef.service.dto.response.Response;
 import com.teddy.youtuberef.web.rest.VideoController;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,51 +22,42 @@ public class VideoControllerImpl implements VideoController {
     private final VideoService videoService;
 
     @Override
-    public ResponseEntity<VideoDto> createVideo(@NonNull final VideoDto videoDto) {
+    public Response<VideoDto> createVideo(@NonNull final VideoDto videoDto) {
         log.info("====== Create Video request: {}",videoDto);
         final VideoDto video = videoService.createVideo(videoDto);
         log.info("===== Create Video response: {}",video);
-        return ResponseEntity
-                .created(URI.create("/"+ video.getId()))
-                .body(video);
+        return Response.created(video);
     }
 
     @Override
-    public ResponseEntity<Page<VideoDto>> getAllVideos() {
+    public Response<Page<VideoDto>> getAllVideos() {
         log.info("====== Get Video ======");
         final Page<VideoDto> videos = videoService.getVideos();
-        return ResponseEntity
-                .ok()
-                .body(videos);
+        return Response.ok(videos);
     }
 
     @Override
-    public ResponseEntity<VideoDto> getVideoById(@NonNull final String id) {
+    public Response<VideoDto> getVideoById(@NonNull final String id) {
         log.info("====== Get Video request id: {}",id);
         final VideoDto video = videoService.getVideo(id);
         log.info("===== Get Video response: {}",video);
-        return ResponseEntity
-                .ok()
-                .body(video);
+        return Response.ok(video);
+
     }
 
     @Override
-    public ResponseEntity<VideoDto> updateVideo(@NonNull final VideoDto videoDto) {
+    public Response<VideoDto> updateVideo(@NonNull final VideoDto videoDto) {
         log.info("====== Update Video request: {}",videoDto);
         final VideoDto video = videoService.updateVideo(videoDto);
         log.info("===== Update Video response: {}",video);
-        return ResponseEntity
-                .ok()
-                .body(video);
+        return Response.ok(video);
     }
 
     @Override
-    public ResponseEntity<Void> deleteVideo(@NonNull final List<String> ids) {
+    public Response<Void> deleteVideo(@NonNull final List<String> ids) {
         log.info("====== Delete Video request ids: {}",ids);
         videoService.deleteVideo(ids);
         log.info("===== Delete Video response: {}",ids);
-        return ResponseEntity
-                .noContent()
-                .build();
+        return Response.noContent();
     }
 }

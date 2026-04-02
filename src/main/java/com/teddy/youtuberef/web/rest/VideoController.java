@@ -1,6 +1,7 @@
 package com.teddy.youtuberef.web.rest;
 
 import com.teddy.youtuberef.service.dto.VideoDto;
+import com.teddy.youtuberef.service.dto.response.Response;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -14,21 +15,21 @@ public interface VideoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<VideoDto> createVideo(@RequestBody VideoDto videoDto);
+    Response<VideoDto> createVideo(@RequestBody VideoDto videoDto);
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Page<VideoDto>> getAllVideos();
+    Response<Page<VideoDto>> getAllVideos();
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<VideoDto> getVideoById(@NotNull @PathVariable(name = "id") final String id);
+    Response<VideoDto> getVideoById(@NotNull @PathVariable(name = "id") final String id);
 
     @PutMapping()
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<VideoDto> updateVideo(@RequestBody VideoDto videoDto);
+    Response<VideoDto> updateVideo(@RequestBody VideoDto videoDto);
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Void> deleteVideo(@RequestBody final List<String> ids);
+    Response<Void> deleteVideo(@RequestBody final List<String> ids);
 }
