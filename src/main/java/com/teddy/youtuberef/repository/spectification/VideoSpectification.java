@@ -16,6 +16,9 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class VideoSpectification {
 
+    /*
+    * Define field name for video entity "Column name in database"
+     */
     private static final String FIELD_URL = "url";
     private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_STATUS = "status";
