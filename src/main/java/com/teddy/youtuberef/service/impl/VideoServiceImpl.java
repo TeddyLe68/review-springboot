@@ -5,6 +5,7 @@ import com.teddy.youtuberef.entity.enums.VideoStatus;
 import com.teddy.youtuberef.repository.VideoRepository;
 import com.teddy.youtuberef.service.VideoService;
 import com.teddy.youtuberef.service.dto.VideoDto;
+import com.teddy.youtuberef.service.dto.request.VideoSearchRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +31,11 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public Page<VideoDto> getVideos() {
-        return null;
+    public Page<VideoDto> getVideos(@NonNull final VideoSearchRequest request) {
+        return videoRepository
+                .findAll(request.specification(),
+                         request.getPaging().pageable())
+                .map(VideoDto::from);
     }
 
     @Override

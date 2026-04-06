@@ -2,6 +2,10 @@ package com.teddy.youtuberef.web.rest.impl;
 
 import com.teddy.youtuberef.service.VideoService;
 import com.teddy.youtuberef.service.dto.VideoDto;
+import com.teddy.youtuberef.service.dto.request.PagingRequest;
+import com.teddy.youtuberef.service.dto.request.VideoSearchRequest;
+import com.teddy.youtuberef.service.dto.response.PageableData;
+import com.teddy.youtuberef.service.dto.response.PagingResponse;
 import com.teddy.youtuberef.service.dto.response.Response;
 import com.teddy.youtuberef.web.rest.VideoController;
 import lombok.NonNull;
@@ -9,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -29,11 +34,28 @@ public class VideoControllerImpl implements VideoController {
         return Response.created(video);
     }
 
+    /**
+     * Get video with filter and paging
+     * Structure PagingRequest,PagingResponse
+     * @param request
+     * @return
+     */
     @Override
-    public Response<Page<VideoDto>> getAllVideos() {
+    public Response<PagingResponse<VideoDto>> getVideos(@RequestBody final VideoSearchRequest request) {
         log.info("====== Get Video ======");
-        final Page<VideoDto> videos = videoService.getVideos();
-        return Response.ok(videos);
+        final Page<VideoDto> videos = videoService.getVideos(request);
+        final PagingRequest paging = request.getPaging();
+        return Response.ok(
+                new PagingResponse<VideoDto>()
+                        .setContents(videos.getContent())
+                        .setPaging(
+                                new PageableData()
+                                        .setPageNumber(paging.getPage()-1)
+                                        .setPageSize(paging.getSize())
+                                        .setTotalPages(videos.getTotalPages())
+                                        .setTotalRecord(videos.getTotalElements())
+                        )
+        );
     }
 
     @Override
