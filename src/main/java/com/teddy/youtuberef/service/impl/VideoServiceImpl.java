@@ -6,6 +6,7 @@ import com.teddy.youtuberef.repository.VideoRepository;
 import com.teddy.youtuberef.service.VideoService;
 import com.teddy.youtuberef.service.dto.VideoDto;
 import com.teddy.youtuberef.service.dto.request.VideoSearchRequest;
+import com.teddy.youtuberef.service.mapper.VideoMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +21,14 @@ import java.util.List;
 public class VideoServiceImpl implements VideoService {
 
     private final VideoRepository videoRepository;
+    private final VideoMapper videoMapper;
 
     @Override
     public VideoDto getVideo(@NonNull final String id) {
 
         return videoRepository.findById(id)
                 // entity -> VideoDto.from(entity)
-                .map(VideoDto::from)
+                .map(videoMapper::toDto)
                 .orElseThrow(()-> new RuntimeException("Video không tồn tại với id là: " + id));
     }
 
@@ -35,21 +37,21 @@ public class VideoServiceImpl implements VideoService {
         return videoRepository
                 .findAll(request.specification(),
                          request.getPaging().pageable())
-                .map(VideoDto::from);
+                .map(videoMapper::toDto);
     }
 
     @Override
     public VideoDto createVideo(@NonNull final VideoDto videoDto) {
-        final VideoEntity entity = videoDto.toEntity();
-        return VideoDto.from(videoRepository.save(entity));
+        final VideoEntity entity = videoMapper.toEntity(videoDto);
+        return videoMapper.toDto(videoRepository.save(entity));
     }
 
     @Override
     public VideoDto updateVideo(@NonNull final VideoDto videoDto) {
         final String id = videoDto.getId();
        if(videoRepository.existsById(videoDto.getId())){
-           final VideoEntity entity = videoDto.toEntity();
-           return VideoDto.from(videoRepository.save(entity));
+           final VideoEntity entity = videoMapper.toEntity(videoDto);
+           return videoMapper.toDto(videoRepository.save(entity));
        }
        throw new RuntimeException("Không tìm thấy video với id là : " + id);
     }
