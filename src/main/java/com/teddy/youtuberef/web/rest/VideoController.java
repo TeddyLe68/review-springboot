@@ -4,10 +4,9 @@ import com.teddy.youtuberef.service.dto.VideoDto;
 import com.teddy.youtuberef.service.dto.request.VideoSearchRequest;
 import com.teddy.youtuberef.service.dto.response.PagingResponse;
 import com.teddy.youtuberef.service.dto.response.Response;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public interface VideoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    Response<VideoDto> createVideo(@RequestBody VideoDto videoDto);
+    Response<VideoDto> createVideo(@Valid @RequestBody VideoDto videoDto);
 
     @PostMapping("/search")
     @ResponseStatus(HttpStatus.OK)
