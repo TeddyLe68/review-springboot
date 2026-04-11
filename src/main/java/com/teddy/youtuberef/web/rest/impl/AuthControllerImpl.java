@@ -1,11 +1,14 @@
 package com.teddy.youtuberef.web.rest.impl;
 
 import com.teddy.youtuberef.service.AuthenticationService;
+import com.teddy.youtuberef.service.dto.AccountDto;
 import com.teddy.youtuberef.service.dto.request.LoginRequest;
+import com.teddy.youtuberef.service.dto.request.RegisterAccountRequest;
 import com.teddy.youtuberef.service.dto.response.LoginResponse;
 import com.teddy.youtuberef.service.dto.response.Response;
 import com.teddy.youtuberef.web.rest.AuthController;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,5 +19,12 @@ public class AuthControllerImpl implements AuthController {
     @Override
     public Response<LoginResponse> login(LoginRequest loginRequest) {
         return Response.ok(authenticationService.login(loginRequest));
+    }
+
+    @Override
+    public Response<AccountDto> register(RegisterAccountRequest registerAccountRequest) {
+        return Response.created(
+                authenticationService.register(registerAccountRequest)
+        );
     }
 }

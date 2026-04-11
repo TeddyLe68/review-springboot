@@ -20,6 +20,12 @@ spring:
       ddl-auto: update
     generate-ddl: true
 
+intergration:
+  minio:
+    access-key: ${MINIO_ACCESS_KEY:admin}
+    secret-key: ${MINIO_SECRET_KEY:admin@2024}
+    url: ${MINIO_URI:http://localhost:9000}
+
 server:
   port: 8080
 

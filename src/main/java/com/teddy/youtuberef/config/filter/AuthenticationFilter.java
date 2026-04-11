@@ -40,6 +40,12 @@ import java.util.Objects;
 public class AuthenticationFilter extends OncePerRequestFilter {
     SecurityProperties securityProperties;
     AccountRepository accountRepository;
+
+    static List<String> API_PUBLIC = List.of(
+            "/api/v1/auth/login",
+            "/api/v1/auth/register"
+    );
+
     /**
      * This method is called for every incoming HTTP request.
      * It allows you to perform authentication checks before the request is processed further.
@@ -52,16 +58,16 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        if (request.getRequestURI().equals("/api/v1/auth/login")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        final var authentication = getAuthentication(request, response);
-        if (!ObjectUtils.isEmpty(authentication)) {
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (API_PUBLIC.contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
         }else {
-            responseFailCredential(response,HttpStatus.UNAUTHORIZED);
+            final var authentication = getAuthentication(request, response);
+            if (!ObjectUtils.isEmpty(authentication)) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                filterChain.doFilter(request, response);
+            } else {
+                responseFailCredential(response, HttpStatus.UNAUTHORIZED);
+            }
         }
     }
 

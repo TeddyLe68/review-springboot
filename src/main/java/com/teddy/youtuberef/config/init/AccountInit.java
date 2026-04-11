@@ -28,16 +28,16 @@ public class AccountInit implements CommandLineRunner {
         }
 
         final var account = AccountEntity.builder()
-                .username("quocviet.hn98@gmail.com")
-                .passwordHash(this.passwordEncoder.encode("viet1998"))
+                .username("teddy@gmail.com")
+                .passwordHash(this.passwordEncoder.encode("thang123"))
                 .uuid(UUID.randomUUID().toString())
                 .roles(List.of(
                         RoleEntity.builder()
                                 .name(ERole.ADMIN)
-                                .build(),
-                        RoleEntity.builder()
-                                .name(ERole.USER)
                                 .build()
+//                        RoleEntity.builder()
+//                                .name(ERole.USER)
+//                                .build()
                 ))
 
                 .build();
