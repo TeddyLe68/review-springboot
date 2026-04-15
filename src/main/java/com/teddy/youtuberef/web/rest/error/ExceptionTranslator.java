@@ -5,6 +5,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +15,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +38,10 @@ public class ExceptionTranslator implements ResponseErrorHandler {
     private ResponseEntity<ErrorResponse> forbidden(ErrorResponse result){
         return new ResponseEntity<>(result, HttpStatus.FORBIDDEN);
     }
+    private ResponseEntity<ErrorResponse> unauthorized(ErrorResponse result) {
+        return new ResponseEntity<>(result, HttpStatus.FORBIDDEN);
+    }
+
 
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -57,8 +63,26 @@ public class ExceptionTranslator implements ResponseErrorHandler {
                 "Validation Failed",
                 errorResults
         );
-
         return badRequest(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("service", ex.getMessage());
+        return forbidden(
+                new ErrorResponse(AppConstant.FORBIDDEN.getCode(), AppConstant.SERVICE_ERROR.getMessage(), map)
+        );
+    }
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    ResponseEntity<ErrorResponse> handleAccessDeniedException(AuthenticationException ex) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("service", ex.getMessage());
+        return unauthorized(
+                new ErrorResponse(AppConstant.UNAUTHORIZED.getCode(), AppConstant.UNAUTHORIZED.getMessage(), map)
+        );
     }
 
     @Override

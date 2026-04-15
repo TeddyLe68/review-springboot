@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 
@@ -14,11 +15,18 @@ import java.io.Serializable;
 public class MessageCode implements Serializable {
     protected String code;
     protected String message;
+
+    public MessageCode() {
+    }
+
     public MessageCode(String code, String message) {
         this.code = code;
         this.message = message;
     }
-    public MessageCode(){
 
+    public MessageCode(HttpStatus status) {
+        this.code = String.valueOf(status.value());
+        this.message = status.getReasonPhrase();
     }
 }
+

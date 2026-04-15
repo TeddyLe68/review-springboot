@@ -20,7 +20,7 @@ public interface VideoController {
     @ResponseStatus(HttpStatus.CREATED)
     Response<VideoDto> createVideo(@Valid @RequestBody VideoDto videoDto);
 
-    @Secured("ROLE_USER")
+    @Secured("ROLE_ADMIN")
     @PostMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     Response<PagingResponse<VideoDto>> getVideos(@RequestBody final VideoSearchRequest request);

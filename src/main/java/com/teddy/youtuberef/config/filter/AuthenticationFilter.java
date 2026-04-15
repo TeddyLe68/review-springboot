@@ -1,10 +1,11 @@
 package com.teddy.youtuberef.config.filter;
 
 import com.teddy.youtuberef.common.utils.jwtUtil;
-import com.teddy.youtuberef.config.SecurityProperties;
+import com.teddy.youtuberef.config.properties.SecurityProperties;
 import com.teddy.youtuberef.entity.AccountEntity;
 import com.teddy.youtuberef.entity.RoleEntity;
 import com.teddy.youtuberef.repository.AccountRepository;
+import com.teddy.youtuberef.security.jwt.TokenProvider;
 import com.teddy.youtuberef.web.rest.error.MessageCode;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
@@ -30,14 +31,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
+import static com.teddy.youtuberef.config.SecurityConfiguration.PUBLIC_APIS;
 
 @Configuration
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationFilter extends OncePerRequestFilter {
+    static String AUTHORIZATION_HEADER = "Authorization";
+    static String AUTHORIZATION_TOKEN =  "access_token";
+    TokenProvider tokenProvider;
+
+
     SecurityProperties securityProperties;
     AccountRepository accountRepository;
 
@@ -45,6 +51,20 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/auth/login",
             "/api/v1/auth/register"
     );
+
+    /**
+     *
+     * This method is used to determine whether the filter should be applied to a given request.
+     * @param request
+     * @return
+     * @throws ServletException
+     */
+    @Override
+    protected boolean shouldNotFilter(final HttpServletRequest request) throws ServletException {
+        final var path = request.getRequestURI();
+        return PUBLIC_APIS.contains(path);
+    }
+
 
     /**
      * This method is called for every incoming HTTP request.
@@ -57,94 +77,22 @@ public class AuthenticationFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
-        if (API_PUBLIC.contains(request.getRequestURI())) {
-            filterChain.doFilter(request, response);
-        }else {
-            final var authentication = getAuthentication(request, response);
-            if (!ObjectUtils.isEmpty(authentication)) {
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                filterChain.doFilter(request, response);
-            } else {
-                responseFailCredential(response, HttpStatus.UNAUTHORIZED);
-            }
+        String jwt = resolveToken(request);
+        if (StringUtils.hasText(jwt) && this.tokenProvider.validateToken(jwt)) {
+            Authentication authentication = this.tokenProvider.getAuthentication(jwt);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
+        filterChain.doFilter(request, response);
     }
-
-    /**
-     * This method is responsible for extracting the JWT token from the Authorization header of the HTTP request,
-        * validating the token, and returning an Authentication object if the token is valid.
-     * @param httpServletRequest
-     * @param httpServletResponse
-     * @return
-     * @throws IOException
-     * @throws ServletException
-     */
-    public Authentication getAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
-        final var authorization = httpServletRequest.getHeader("Authorization");
-        UsernamePasswordAuthenticationToken authentication = null;
-
-        // Check if the Authorization header is present and starts with "Bearer "
-        if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
-            final var token = authorization.substring(7);
-            // Validate the JWT token using the jwtUtil class and the secret key from securityProperties
-            try {
-                jwtUtil.validateJwtToken(token,securityProperties.getJwtSecret() );
-            }catch (Exception e){
-                responseFailCredential(httpServletResponse,HttpStatus.UNAUTHORIZED);
-                return null;
-            }
-            // After validating the token, extract the user UUID from the token and retrieve the corresponding account from the database
-            final var uuid = jwtUtil.getUserUuidFromJwtToken(token, securityProperties.getJwtSecret());
-            final var account = this.accountRepository.findByUuid(uuid)
-                    .orElseThrow(EntityNotFoundException::new);
-
-            // If the account is found, create a UsernamePasswordAuthenticationToken
-            // with the account details and authorities, and set it in the SecurityContext
-            authentication = new UsernamePasswordAuthenticationToken(account,null,buildAuthorities(account));
-
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+    private String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
         }
-        return authentication;
-    }
-
-    /**
-     * This method is responsible for sending a failure response when authentication fails.
-     * @param httpServletResponse
-     * @param status
-     * @throws IOException
-     *
-     * Response structure:
-     * {
-     *   "code": "401",
-     *   "message": "Unauthorized"
-     * }
-     */
-    private void responseFailCredential(HttpServletResponse httpServletResponse, HttpStatus status) throws IOException {
-        httpServletResponse.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        httpServletResponse.setStatus(status.value());
-        new ObjectMapper().writeValue(
-                httpServletResponse.getOutputStream(),
-                new MessageCode(
-                        String.valueOf(status.value()),
-                        status.getReasonPhrase()));
-        httpServletResponse.flushBuffer();
-    }
-
-    /**
-     *
-     * @param account
-     * @return
-     *
-     * This method is responsible for building a list of GrantedAuthority
-     * objects based on the roles associated with the given AccountEntity.
-     */
-    private List<? extends GrantedAuthority> buildAuthorities(AccountEntity account) {
-        return account.getRoles().stream()
-                .map(RoleEntity::getName)
-                .map(Enum::name)
-                .map(role -> "ROLE_" + role)
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+        String jwt = request.getParameter(AUTHORIZATION_TOKEN);
+        if (StringUtils.hasText(jwt)) {
+            return jwt;
+        }
+        return null;
     }
 }

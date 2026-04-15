@@ -1,4 +1,4 @@
-package com.teddy.youtuberef.config;
+package com.teddy.youtuberef.config.properties;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,5 +15,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SecurityProperties {
     String jwtSecret;
-    int jwtExpiration;
+    long jwtExpiration;
+    long rememberMeExpiration;
+
 }
