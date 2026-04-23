@@ -45,7 +45,8 @@ public class SecurityConfiguration {
 
     public static final List<String> PUBLIC_APIS = List.of(
             "/api/v1/auth/login",
-            "/api/v1/auth/register"
+            "/api/v1/auth/register",
+            "/youtuberef/ws/**"
     );
 
     @Bean
